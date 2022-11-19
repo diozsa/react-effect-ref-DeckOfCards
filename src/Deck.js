@@ -15,9 +15,9 @@ const Deck = () => {
     // requesting deck from API and save in state "deck"
     useEffect(() => {
         axios.get(`${API_URI}/new/shuffle/`).then(res => {
-            console.log(res.data)
-            setDeck(res.data)
-        })
+            setDeck(res.data);
+            console.log(res.data);
+        });
     }, []);
 
 
@@ -28,9 +28,13 @@ const Deck = () => {
 
     //draw card from deck_id and save in state "drawn"
     useEffect(() => {
-    async function getCard() {
-        let { deck_id } = deck;
-        console.log(deck_id)
+        const getCard = async () => {
+            if (!deck) {
+                return;
+            }
+            let { deck_id } = deck;
+            console.log(deck_id);
+
             try {
                 let draw = await axios.get(`${API_URI}/${deck_id}/draw/?count=1`);
                 if (draw.data.remaining === 0) {
@@ -38,7 +42,7 @@ const Deck = () => {
                     throw new Error("No card left in deck!");
                 }
                 const card = draw.data.cards[0];
-                setDrawn(c => [...c,
+                setDrawn(prev => [...prev,
                 {
                     id: card.code,
                     name: card.suit + " " + card.value,
@@ -60,15 +64,17 @@ const Deck = () => {
         }
     }, [setAutoDraw, autoDraw, deck]);
 
-    let cards = drawn.map(c => (
-        <Card key={c.id} name={c.name} source={c.image} />));
+    let cards = drawn.map(c => {
+        console.log("drawn.map - Here is the card being rendered:", c);
+        return <Card key={c.id} name={c.name} source={c.image} />;
+    });
 
     return (
         <div>
             {deck ? <button onClick={toggleAutoDraw}>
                 {autoDraw ? "STOP" : "START"} Auto-Draw!
                     </button> : null}
-            <div>{cards}</div>
+            <div className="Deck">{cards}</div>
         </div>
     )
 };
